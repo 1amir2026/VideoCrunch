@@ -1,0 +1,143 @@
+name: Build VideoСrunch EXE
+
+on:
+  push:
+    tags:
+      - "v*.*.*"          # triggers on version tags like v1.0.0
+  workflow_dispatch:       # manual trigger from GitHub UI
+
+permissions:
+  contents: write          # needed to create GitHub Releases
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build — ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: videocrunch-windows-x64.exe
+            ffmpeg_url: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+            ffmpeg_bin_path: ffmpeg-*-essentials_build/bin/ffmpeg.exe
+            ffprobe_bin_path: ffmpeg-*-essentials_build/bin/ffprobe.exe
+
+          - os: macos-latest
+            artifact_name: videocrunch-macos-arm64
+
+          - os: ubuntu-latest
+            artifact_name: videocrunch-linux-x64
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Python setup ────────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # ── 3a. FFmpeg — Windows (download manually) ───────────────────────────
+      - name: Download FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $url = "${{ matrix.ffmpeg_url }}"
+          Invoke-WebRequest -Uri $url -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg_tmp
+          New-Item -ItemType Directory -Force -Path bin | Out-Null
+          $ffmpeg  = Get-Item "ffmpeg_tmp\${{ matrix.ffmpeg_bin_path }}"  -ErrorAction Stop
+          $ffprobe = Get-Item "ffmpeg_tmp\${{ matrix.ffprobe_bin_path }}" -ErrorAction Stop
+          Copy-Item $ffmpeg.FullName  -Destination "bin\ffmpeg.exe"
+          Copy-Item $ffprobe.FullName -Destination "bin\ffprobe.exe"
+          Write-Host "FFmpeg version:"
+          bin\ffmpeg.exe -version | Select-Object -First 1
+
+      # ── 3b. FFmpeg — macOS ─────────────────────────────────────────────────
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install ffmpeg
+          mkdir -p bin
+          cp "$(which ffmpeg)"  bin/ffmpeg
+          cp "$(which ffprobe)" bin/ffprobe
+          chmod +x bin/ffmpeg bin/ffprobe
+
+      # ── 3c. FFmpeg — Linux ─────────────────────────────────────────────────
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          mkdir -p bin
+          cp "$(which ffmpeg)"  bin/ffmpeg
+          cp "$(which ffprobe)" bin/ffprobe
+          chmod +x bin/ffmpeg bin/ffprobe
+
+      # ── 4. Build with PyInstaller ──────────────────────────────────────────
+      - name: Build EXE / binary
+        run: pyinstaller videocrunch.spec
+
+      # ── 5. Rename output ───────────────────────────────────────────────────
+      - name: Rename output artifact (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Move-Item "dist\videocrunch.exe" "dist\${{ matrix.artifact_name }}"
+
+      - name: Rename output artifact (Unix)
+        if: runner.os != 'Windows'
+        run: mv dist/videocrunch dist/${{ matrix.artifact_name }}
+
+      # ── 6. Upload artifact ────────────────────────────────────────────────
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/${{ matrix.artifact_name }}
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')   # only on version tags
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: List artifacts
+        run: ls -lhR release-assets/
+
+      - name: Create Release & upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "VideoСrunch ${{ github.ref_name }}"
+          body: |
+            ## VideoСrunch ${{ github.ref_name }}
+
+            Interactive CLI video compressor — reduces file size without changing resolution.
+
+            ### Downloads
+            | Platform | File |
+            |----------|------|
+            | Windows 64-bit | `videocrunch-windows-x64.exe` |
+            | macOS (Apple Silicon) | `videocrunch-macos-arm64` |
+            | Linux 64-bit | `videocrunch-linux-x64` |
+
+            > **macOS / Linux**: run `chmod +x videocrunch-*` after download.
+          files: release-assets/**/*
+          draft: false
+          prerelease: false
