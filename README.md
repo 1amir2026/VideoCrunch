@@ -2,7 +2,7 @@
 
 > **Compress videos without changing resolution** — an interactive CLI tool powered by FFmpeg and packaged as a single executable.
 
-[![Build](https://github.com/YOUR_USERNAME/videocrunch/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR_USERNAME/videocrunch/actions/workflows/build.yml)
+[![Build](https://github.com/1amir2026/videocrunch/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR_USERNAME/videocrunch/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](#download)
 
