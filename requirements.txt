@@ -1,0 +1,4 @@
+# VideoСrunch — Python dependencies
+# Standard library only; no third-party packages needed.
+# PyInstaller is required only for building the EXE.
+pyinstaller>=6.0
