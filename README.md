@@ -2,7 +2,7 @@
 
 > **Compress videos without changing resolution** — an interactive CLI tool powered by FFmpeg and packaged as a single executable.
 
-[![Build](https://github.com/1amir2026/videocrunch/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR_USERNAME/videocrunch/actions/workflows/build.yml)
+[![Build](https://github.com/1amir2026/videocrunch/actions/workflows/build.yml/badge.svg)](https://github.com/1amir2026/videocrunch/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](#download)
 
@@ -47,9 +47,9 @@ Pre-built single-file executables — **no Python or FFmpeg installation require
 
 | Platform | Download |
 |----------|----------|
-| 🪟 Windows 64-bit | [videocrunch-windows-x64.exe](https://github.com/YOUR_USERNAME/videocrunch/releases/latest) |
-| 🍎 macOS (Apple Silicon) | [videocrunch-macos-arm64](https://github.com/YOUR_USERNAME/videocrunch/releases/latest) |
-| 🐧 Linux 64-bit | [videocrunch-linux-x64](https://github.com/YOUR_USERNAME/videocrunch/releases/latest) |
+| 🪟 Windows 64-bit | [videocrunch-windows-x64.exe](https://github.com/1amir2026/videocrunch/releases/latest) |
+| 🍎 macOS (Apple Silicon) | [videocrunch-macos-arm64](https://github.com/1amir2026/videocrunch/releases/latest) |
+| 🐧 Linux 64-bit | [videocrunch-linux-x64](https://github.com/1amir2026/videocrunch/releases/latest) |
 
 > **macOS / Linux:** make the file executable after downloading:
 > ```bash
@@ -108,7 +108,7 @@ Pre-built single-file executables — **no Python or FFmpeg installation require
 - FFmpeg installed and on PATH (or placed in `./bin/`)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/videocrunch.git
+git clone https://github.com/1amir2026/videocrunch.git
 cd videocrunch
 
 pip install -r requirements.txt
